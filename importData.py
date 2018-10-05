@@ -17,10 +17,10 @@ dataframe = preProcess(filename)
 # Supply variable for the access outside - check that dataframe is the right format first
 
 # experiment with just one product's data first
-fields = ["kiosk_id", "product_id", "card_hash", "date_time", "fc_number"]
-dataproduct = dataframe.loc[(dataframe.product_id == 2605), fields]
-dataproduct = dataproduct.sort_values(by=['card_hash','date_time'])
-userlist = list(set(dataproduct.card_hash))
+# fields = ["kiosk_id", "product_id", "card_hash", "date_time", "fc_number"]
+# dataproduct = dataframe.loc[(dataframe.product_id == 2605), fields]
+# dataproduct = dataproduct.sort_values(by=['card_hash','date_time'])
+# userlist = list(set(dataproduct.card_hash))
 
 # dataproduct is now a sorted dataframe
 # if we loop through every row... we could just update our result dataframe with each entry
@@ -42,7 +42,7 @@ userlist = list(set(dataproduct.card_hash))
 
 
 # Different dataframe construction
-userResult = pd.DataFrame(columns=["card_hash", "item_life", "purchase_count", "avg_window"])
+# userResult = pd.DataFrame(columns=["card_hash", "item_life", "purchase_count", "avg_window"])
 
 # Follow this to insert row by row
 # https://stackoverflow.com/questions/17091769/python-pandas-fill-a-dataframe-row-by-row
@@ -52,26 +52,50 @@ userResult = pd.DataFrame(columns=["card_hash", "item_life", "purchase_count", "
 # then do shortAvgPurchaseWindow(dataframe), make it output both values and store it in qweq
 
 # loop through qweq, and be inserting as we go - otherwise, fill the result dataframe as we go?
-index = 0
-for user in userlist:
-    small = getUserDataframe(dataproduct, user)
-    timedelta, count, avg = shortAvgPurchaseWindow(small)
-    #insert each of the values
-    userResult.loc[index] = pd.Series({'card_hash': user, 'item_life': timedelta, 'purchase_count': count, 'avg_window': avg})
-    index += 1
+# index = 0
+# for user in userlist:
+#     small = getUserDataframe(dataproduct, user)
+#     timedelta, count, avg = shortAvgPurchaseWindow(small)
+#     #insert each of the values
+#     userResult.loc[index] = pd.Series({'card_hash': user, 'item_life': timedelta, 'purchase_count': count, 'avg_window': avg})
+#     index += 1
 
-# datauser = getUserDataframe(dataframe, userhash)
-# datauserproduct = getSmallDataProduct(datauser, prodid)
-# datasorted = datauserproduct.sort_values(by=['date_time'])
-# datasorted = datasorted.reset_index()
-#
-# datausersorted = datauser.sort_values(['product_id','date_time'])
+datauser = getUserDataframe(dataframe, userhash)
+datauserproduct = getSmallDataProduct(datauser, prodid)
+datasorted = datauserproduct.sort_values(by=['date_time'])
+datasorted = datasorted.reset_index()
+
+#datausersorted = datauser.sort_values(['product_id','date_time'])
 #
 # # Test looping through data
 # for index, row in datausersorted.iterrows():
 #     print(row)
 
 # What is a good way to visualize this result?  Do we also want an overall average?  Variance?  Weight by count?
-print(userResult)
+#print(userResult)
 
 # datausersorted.to_csv("C:/Users/NPC/Desktop/Career/Bytefoods/userexplore.csv")
+series = datasorted['date_time']
+# Change them to datetime objects
+
+q = pd.to_datetime(series[1:series.count()])
+q = q.reset_index()
+r = pd.to_datetime(series[0:series.count()-1])
+r = r.reset_index()
+diffseries = q - r
+print("q")
+print(q)
+print("r")
+print(r)
+print("difference")
+print(diffseries)
+
+mean, sd = avgPurchaseWindowSD(series)
+
+print(mean)
+print(sd)
+# for date in series:
+#     currdate = pd.to_datetime(date)
+#     print(currdate)
+# Try this in a bit
+#window, sd = avgPurchaseWindowSD(datasorted)
