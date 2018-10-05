@@ -3,9 +3,10 @@ import pandas as pd
 def preProcess(filename):
 
     # check that filename is not null
+    # clean out null data
 
     dataframe = pd.read_csv(filename, sep=",")
-
+    dataframe = dataframe.dropna()
     return dataframe
 
 # dataframe must have five fields of "kiosk_id", "product_id", "card_hash", "date_time", "fc_number"
@@ -22,16 +23,12 @@ def getSmallDataProduct(dataframe, prodid):
     dataproduct = dataframe.loc[(dataframe.product_id == prodid), ["kiosk_id", "date_time"]]
     return dataproduct
 
-
-def singleProductAnalysis(dataframe, userhash, prodid):
-    # A higher productAnalysis function should call this for each product id in the list.
-    freq = 1.234
-    return freq
-
 # need to pass in a dataframe with just kiosk_id and date_time... is there a way to redefine these dataframes?
 def shortAvgPurchaseWindow(dataframe):
     # More universal to use this if I can make any field an input instead of just "date_time"
     # Can save time if we already know the dataframe is sorted, but oh well
+
+    # This returns 0 days if it's the only purchase!
 
     # Find latest date_time
     maxdate = pd.to_datetime(max(dataframe["date_time"]))
@@ -45,6 +42,7 @@ def shortAvgPurchaseWindow(dataframe):
     # Convert to something more displayable?
     return avgPurchaseWindow
 
+# Not done yet, will write a version to deal with outliers if I have time.
 def realAveragePurchaseWindow(dataframe, userhash, prodid):
     # This should filter outliers and stuff, figure it out later.
     purchaseWindow = 0

@@ -1,73 +1,73 @@
+from UserAnalysisFunctions import *
 
-import pandas as pd
-# Python doesn't recognize \ as a file location splitter, so I have to use /
-
-#filename = 'C:/Users/NPC/Desktop/Career/Bytefoods/sampledata.csv'
+# First Data Insight - Average Purchase Window!
+# This script will find the average purchase window time for a specific user/product pairing
+# That data will be useful to understand how often to restock that particular product
+# Can possibly be generalized for each separate product
+# Average active customer count can be multiplied by this number to find the number to stock
 filename = 'C:/Users/NPC/Desktop/Career/Bytefoods/items_purchased.csv'
-
-# Learn about what datatype the output for read_csv from pandas is, how to manipulate it, etc
-df = pd.read_csv(filename, sep=",")
-#print(df)
-
-print(df.loc[3][2])
-
-# Column 2 has the hash
-# Row 3 is the 4th entry (remember indexes start at 0)
-
-# This is a PANDAS DataFrame
+userhash = "64LcsIctWnPrGaXfcW+gPRBJq5akh84HNEuUWbemoFZT8YOwmWpMjNDfRzyllfGGKXo37iHtiLOrIEW6XAePrw=="
+prodid = 2605
+# give a more easy to read name instead of df
+dataframe = preProcess(filename)
 
 
+# later on make this a function that you can input the df.card_hash for
 
-#remove data with fc_number = null
+# Supply variable for the access outside - check that dataframe is the right format first
 
+# experiment with just one product's data first
+fields = ["kiosk_id", "product_id", "card_hash", "date_time", "fc_number"]
+dataproduct = dataframe.loc[(dataframe.product_id == 2605), fields]
+dataproduct = dataproduct.sort_values(by=['card_hash','date_time'])
+userlist = list(set(dataproduct.card_hash))
 
+# dataproduct is now a sorted dataframe
+# if we loop through every row... we could just update our result dataframe with each entry
+# what is an efficient way to do that?  loop through and just pick the entry and exit values?
+# This is like my IFTA algorithm, when the user id changes, log the value.
 
+# For now lets just do the inefficient version, can improve on it after.
 
-# create subset of data of one product
-# pick this product 4167
-dp4167 = df.loc[(df.product_id == 4167), ["kiosk_id", "product_id", "card_hash", "date_time", "fc_number"]]
-# Think about how to simplify the card_hash into a smaller value to use?  Easier to see
+# inefficient version - use whole dataframe (dataproduct) for each user...
 
+# Create a dataframe of the size of userlist
+# Add a column for each of the results we want
 
-print(dp4167)
-
-
-# analyze just the most frequent user
-# find the user with the most entries first, then use that subset
-
-user_counts = df["card_hash"].value_counts()
-print(user_counts)
-
-# pick this user pFCsO21elMCmPzQ4S0ASZesbTnPjb75q6sB4KEwR/SHlZJ4XlKB3wssrWb1cTRVYjEraXRaQssMiFUKXjJ0r3Q==
-du1= df.loc[(df.card_hash == "pFCsO21elMCmPzQ4S0ASZesbTnPjb75q6sB4KEwR/SHlZJ4XlKB3wssrWb1cTRVYjEraXRaQssMiFUKXjJ0r3Q=="), ["kiosk_id", "product_id", "card_hash", "date_time", "fc_number"]]
-print(du1)
-
-
-# Most common user: pxWdKu6voFceSKpehBo0XZ6EJF5N0UDXWvnd/EbM46cidlZpC1Md3ilg1NvM19ip8WAvilcMdy8siy5whPtAKA==
-du2= df.loc[(df.card_hash == "pxWdKu6voFceSKpehBo0XZ6EJF5N0UDXWvnd/EbM46cidlZpC1Md3ilg1NvM19ip8WAvilcMdy8siy5whPtAKA=="), ["kiosk_id", "product_id", "card_hash", "date_time", "fc_number"]]
-
-# Make a function/script that sorts the data by user, and does some analysis
+qweq = pd.DataFrame(userlist, columns=["card_hash"])
+qweq["item_life"] = ""
+qweq["purchase_count"] = ""
+# For this one, see if I can just do a vectorized operation of item_life // purchase_count later
+qweq["avg_window"] = ""
 
 
+# Different dataframe construction
+userResult = pd.DataFrame(columns["card_hash", "item_life", "purchase_count", "avg_window"])
+
+# Follow this to insert row by row
+# https://stackoverflow.com/questions/17091769/python-pandas-fill-a-dataframe-row-by-row
+
+
+# loop through qweq/userlist and get the smaller dataframe for each user
+# then do shortAvgPurchaseWindow(dataframe), make it output both values and store it in qweq
+
+# loop through qweq, and be inserting as we go - otherwise, fill the result dataframe as we go?
+for user in userlist:
+    small = getUserDataframe(dataproduct, user)
+    avg = shortAvgPurchaseWindow(small)
+    print(avg)
+
+# datauser = getUserDataframe(dataframe, userhash)
+# datauserproduct = getSmallDataProduct(datauser, prodid)
+# datasorted = datauserproduct.sort_values(by=['date_time'])
+# datasorted = datasorted.reset_index()
+#
+# datausersorted = datauser.sort_values(['product_id','date_time'])
+#
+# # Test looping through data
+# for index, row in datausersorted.iterrows():
+#     print(row)
 
 
 
-
-
-# create subset of data of one kiosk
-# Pick this kiosk - 548
-# 625 rows of data for this kiosk - lets look into that in a bit more detail first?
-
-# For this one kiosk, lets first just look at the most common product, and analyze the time that product is bought
-
-# Maybe we can look at products with the same category, and see if one fades out as another fades in?
-# If this is the case, we can apply that analysis to other kiosks, too
-dk548= df.loc[(df.kiosk_id == 548), ["kiosk_id", "product_id", "card_hash", "date_time", "fc_number"]]
-print(dk548)
-
-dk548sortdate = dk548.sort_values(by=["date_time"])
-print(dk548sortdate)
-
-dk548sortprod = dk548.sort_values(by=["product_id", "date_time"])
-print(dk548sortprod)
-
+# datausersorted.to_csv("C:/Users/NPC/Desktop/Career/Bytefoods/userexplore.csv")
