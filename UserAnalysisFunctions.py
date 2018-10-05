@@ -37,10 +37,10 @@ def shortAvgPurchaseWindow(dataframe):
     # Find number of values
     count = dataframe["date_time"].count()
     # Difference/number of values = avg time between purchases
-    #timedelta = maxdate-mindate
+    timedelta = maxdate-mindate
     avgPurchaseWindow = (maxdate-mindate)//count
     # Convert to something more displayable?
-    return avgPurchaseWindow
+    return timedelta, count, avgPurchaseWindow
 
 # Not done yet, will write a version to deal with outliers if I have time.
 def realAveragePurchaseWindow(dataframe, userhash, prodid):
