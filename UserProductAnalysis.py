@@ -9,6 +9,7 @@ from UserAnalysisFunctions import *
 filename = 'C:/Users/NPC/Desktop/Career/Bytefoods/items_purchased.csv'
 userhash = "64LcsIctWnPrGaXfcW+gPRBJq5akh84HNEuUWbemoFZT8YOwmWpMjNDfRzyllfGGKXo37iHtiLOrIEW6XAePrw=="
 prodid = 2605
+resultFile = 'C:/Users/NPC/Desktop/Career/Bytefoods/purchaseWindow.csv'
 
 # preProcess will throw out all null values first
 dataframe = preProcess(filename)
@@ -18,6 +19,8 @@ dataframe = preProcess(filename)
 # Supply variable for the access outside - check that dataframe is the right format first
 
 # For single user, single product as an example
+print("Data Insight 1 - purchase count, item life, and average purchase window")
+
 datauser = getUserDataframe(dataframe, userhash)
 datauserproduct = getSmallDataProduct(datauser, prodid)
 datasorted = datauserproduct.sort_values(by=['date_time'])
@@ -48,8 +51,8 @@ for user in userlist:
 userResult = userResult.sort_values(by=['purchase_count', 'avg_window'], ascending = False)
 
 # write result back to csv
-userResult.to_csv("C:/Users/NPC/Desktop/Career/Bytefoods/purchaseWindow.csv")
-
+userResult.to_csv(resultFile)
+print("Wrote to csv file " + resultFile)
 
 
 # Data Insight 2
@@ -70,7 +73,7 @@ userResult.to_csv("C:/Users/NPC/Desktop/Career/Bytefoods/purchaseWindow.csv")
 
 # Input should be a time since last purchase, output should be probability that the user dropped the item.
 
-
+print("Data Insight 2 - Customer retention prediction")
 
 # input dataframe should be data from just one user for one product.
 # We already have "datasorted" from earlier, which is for product 2606 for one user.
@@ -79,15 +82,15 @@ userResult.to_csv("C:/Users/NPC/Desktop/Career/Bytefoods/purchaseWindow.csv")
 print(datasorted)
 window2, sd2 = avgPurchaseWindowSD(datasorted["date_time"])
 
-print(window2)
-print(sd2)
+print("Average time between purchases: " + str(window2))
+print("Standard deviation of time between purcahses: " + str(sd2))
 # Lets say it's been 4 days since the user purchased the product.
 # Have to be able to input 4 as a timedelta object, so the calculations are done in the same units
 timeinput = pd.to_timedelta('3 days 07:05:01')
 
 # see if I need this to be numeric instead of timedelta to do probability
 p2 = calculateProbability(timeinput, window2, sd2)
-print("Comparison with average chance")
+print("Comparison of this delay to average delay for this customer")
 print(p2)
 
 # This is a high standard deviation compared to the mean
@@ -97,21 +100,22 @@ print(p2)
 
 
 
-
+print("Data Insight 3 - Product retention prediction in Kiosk")
 # Data Insight 3
 # Probability of a product being out of rotation
 # Similar analysis to 2, but for a specific product stocked at a single kiosk
 
 # Get dataframe data from one kiosk, one product before putting it through the function
 
-datakiosk = getKioskDataframe(dataframe, 548, 4167)
+datakiosk = getKioskDataframe(dataframe, 750, 4061)
 sortedkiosk = datakiosk.sort_values(by=['date_time'])
 window3, sd3 = avgPurchaseWindowSD(sortedkiosk["date_time"])
 
 timeinput2 = pd.to_timedelta('2 days 07:05:01')
-
+print("Average time between purchases: " + str(window3))
+print("Standard deviation of time between purcahses: " + str(sd3))
 p3 = calculateProbability(timeinput2, window3, sd3)
-
+print("Comparison of this delay to average delay for this product in this kiosk")
 print(p3)
 
 # Similar issues as I thought of in second data insight
