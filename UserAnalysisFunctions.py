@@ -4,16 +4,12 @@ import numpy as np
 
 def preProcess(filename):
 
-    # check that filename is not null
-    # clean out null data
-
     dataframe = pd.read_csv(filename, sep=",")
     dataframe = dataframe.dropna()
     return dataframe
 
 # dataframe must have five fields of "kiosk_id", "product_id", "card_hash", "date_time", "fc_number"
 def getUserDataframe(dataframe, userhash):
-    # For now, these are the only fields.  Can make fields an input parameter to make this useful with other datasets.
     fields = ["kiosk_id", "product_id", "card_hash", "date_time", "fc_number"]
     datauser = dataframe.loc[(dataframe.card_hash == userhash), fields]
     return datauser
