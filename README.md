@@ -1,22 +1,15 @@
 # ByteFoods
 Bytefoods data engineer exercise
 
-How to run my project:
-
-1
-2
-3
+How to run - the UserProductAnalysis.py file will run all 3 insight scripts.
+Before running, you will have to change the input file location:
 
 
 
+Data Insight 1 - Purchase Window and Count
 
 
-Results
-
-Data Insight 1
+Data Insight 2 - Chance User drops Product
 
 
-Data Insight 2
-
-
-Data Insight 3
+Data Insight 3 - Chance Kiosk drops Product
