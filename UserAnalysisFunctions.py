@@ -2,13 +2,14 @@ import pandas as pd
 from scipy.stats.distributions import norm
 import numpy as np
 
+# this imports the file and drops all blank entries from the dataset
 def preProcess(filename):
 
     dataframe = pd.read_csv(filename, sep=",")
     dataframe = dataframe.dropna()
     return dataframe
 
-# dataframe must have five fields of "kiosk_id", "product_id", "card_hash", "date_time", "fc_number"
+# assuming five fields of "kiosk_id", "product_id", "card_hash", "date_time", "fc_number"
 def getUserDataframe(dataframe, userhash):
     fields = ["kiosk_id", "product_id", "card_hash", "date_time", "fc_number"]
     datauser = dataframe.loc[(dataframe.card_hash == userhash), fields]
@@ -101,3 +102,37 @@ def calculateProbability(time, avg, sd):
         z = (time - avg)/sd
         p = norm.cdf(z)
     return p
+
+
+# For new data - for now, just merge new data in before running the function
+# I can't think of the best way to maintain data integrity with my current processes
+# Without having to rerun the entire dataset again.
+
+# Calculating standard deviation requires calculating a new mean
+
+# Calculating the average difference time can work if we save the first data point and the count somewhere
+# But processing it should be linear (get first and last point, get count, do the operation)
+# So you might as well just rerun it.
+
+
+# This function imports stuff from the new file into an already existing dataframe
+# Just merge it first (check that it's the same data type, has the same columns, etc)
+# After running this, then sort appropriately for each of the insights
+def mergeNewData(filename, dataframe):
+
+    newdataframe = pd.read_csv(filename, sep=",")
+    newdataframe = newdataframe.dropna()
+
+    # This doesn't break if the dataframes don't have the same fields
+    # But running it on different types of datasets might not be useful
+    # Add a check/error handling here later
+    list_ = []
+
+    list_.append(dataframe)
+    list_.append(newdataframe)
+    output = pd.concat(list_)
+    # need to reindex the data after, or leave that for after sorting
+
+    return output
+
+

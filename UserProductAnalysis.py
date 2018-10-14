@@ -6,6 +6,20 @@ from UserAnalysisFunctions import *
 # Can possibly be generalized for each separate product
 # Also starting to get more used to the tools PANDAS has
 
+filename = 'C:/Users/NPC/Desktop/Career/Bytefoods/sampledata.csv'
+filename2 = 'C:/Users/NPC/Desktop/Career/Bytefoods/baddata.csv'
+
+dataframe3 = preProcess(filename)
+
+dataframe2 = mergeNewData(filename2, dataframe3)
+
+print(dataframe2)
+
+
+
+
+
+
 filename = 'C:/Users/NPC/Desktop/Career/Bytefoods/items_purchased.csv'
 userhash = "64LcsIctWnPrGaXfcW+gPRBJq5akh84HNEuUWbemoFZT8YOwmWpMjNDfRzyllfGGKXo37iHtiLOrIEW6XAePrw=="
 prodid = 2605
