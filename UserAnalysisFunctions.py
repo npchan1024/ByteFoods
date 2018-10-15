@@ -9,49 +9,43 @@ def preProcess(filename):
     dataframe = dataframe.dropna()
     return dataframe
 
-# assuming five fields of "kiosk_id", "product_id", "card_hash", "date_time", "fc_number"
+# this retrieves a dataframe of just one user's data
 def getUserDataframe(dataframe, userhash):
     fields = ["kiosk_id", "product_id", "card_hash", "date_time", "fc_number"]
     datauser = dataframe.loc[(dataframe.card_hash == userhash), fields]
     return datauser
 
-# This is meant to pass a single user's dataframe in and get analysis for a single product
-# Only returning kiosk id and date_time because we don't need the rest, can change this later
-
-
+# returns a dataframe with just data on one product in one kiosk
 def getKioskDataframe(dataframe, kioskid, prodid):
     fields = ["kiosk_id", "product_id", "card_hash", "date_time", "fc_number"]
     datakiosk = dataframe.loc[(dataframe.kiosk_id == kioskid) & (dataframe.product_id == prodid), fields]
     return datakiosk
 
+
+# creates a small dataframe with only the kiosk_id and date_time of the inputted purchases, for one specific product
 def getSmallDataProduct(dataframe, prodid):
-    # for now data format is assumed to be valid
     dataproduct = dataframe.loc[(dataframe.product_id == prodid), ["kiosk_id", "date_time"]]
     return dataproduct
 
-# need to pass in a dataframe with just kiosk_id and date_time... is there a way to redefine these dataframes?
+
+# This function calculates the item lifetime, purchase count, and purchase window for one user for one product
 def shortAvgPurchaseWindow(dataframe):
-    # More universal to use this if I can make any field an input instead of just "date_time"
-    # Can save time if we already know the dataframe is sorted, but oh well
-
-    # This returns 0 days if it's the only purchase!
-
     # Find latest date_time
     maxdate = pd.to_datetime(max(dataframe["date_time"]))
     # Find earliest date_time
     mindate = pd.to_datetime(min(dataframe["date_time"]))
     # Find number of values
-    # This shortcut is okay because we're supposed to divide by n
-    # For my next function, I will have to add conditionals to deal with there only being 1 entry
+
     count = dataframe["date_time"].count()
+    # This shortcut is okay because we're supposed to divide by n    count = dataframe["date_time"].count()
     # Difference/number of values = avg time between purchases
     timedelta = maxdate-mindate
     avgPurchaseWindow = (maxdate-mindate)//count
     # Convert to something more displayable?
     return timedelta, count, avgPurchaseWindow
 
-# has to take in a reindexed sorted series of datetimes
-# creates a list of differences, and then finds standard deviation and mean
+# This function takes in a reindexed sorted series of datetimes
+# Creates a list of differences, and then finds standard deviation and mean
 def avgPurchaseWindowSD(series):
     count = series.count()
     dateseries = pd.to_datetime(series)
@@ -59,8 +53,6 @@ def avgPurchaseWindowSD(series):
     # Find earliest date_time
     mindate = min(dateseries)
     # Find number of values - this will be number of entries in date difference array
-
-    # Might not need this, just use series count - 1
 
     # Total difference/number of values = avg time between purchases
     timedelta = maxdate-mindate
@@ -76,24 +68,21 @@ def avgPurchaseWindowSD(series):
         seconddate = seconddate.reset_index()
         diffseries = seconddate - firstdate
 
-
-        # find standard deviation of series (1-end)
-        #sd = diffseries.std()
+        # Standard Deviation
         sd = np.std(diffseries)
-        # find mean of series
-        #avg = diffseries.mean()
+
+        # Mean
         avg = np.mean(diffseries)
 
-        # this is being returned as a series instead of a timedelta, figure out why
-    # Phase 2 would be to take out outliers - 1st purchase and 2nd purchase are usually further than usual
+    # Convert back to the correct format
     avgtimedelta = avg["date_time"]
     sdtimedelta = sd["date_time"]
 
     return avgtimedelta, sdtimedelta
 
 
-# This is assuming a normal distribution.
-# Does PANDAS already have a function for this?
+# This calculation assumes normal distribution
+# Basically a z-score calculation
 def calculateProbability(time, avg, sd):
     if sd == pd.to_timedelta(0):
         print("Standard deviation is 0, not enough data points, returning p = 0")
@@ -102,7 +91,6 @@ def calculateProbability(time, avg, sd):
         z = (time - avg)/sd
         p = norm.cdf(z)
     return p
-
 
 # For new data - for now, just merge new data in before running the function
 # I can't think of the best way to maintain data integrity with my current processes
@@ -125,9 +113,7 @@ def mergeNewData(filename, dataframe):
 
     # This doesn't break if the dataframes don't have the same fields
     # But running it on different types of datasets might not be useful
-    # Add a check/error handling here later
     list_ = []
-
     list_.append(dataframe)
     list_.append(newdataframe)
     output = pd.concat(list_)
